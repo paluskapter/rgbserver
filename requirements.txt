@@ -1,0 +1,4 @@
+adafruit-circuitpython-neopixel
+boto3
+flask
+webcolors
