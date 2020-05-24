@@ -1,4 +1,20 @@
-def rainbow_wheel(pos):
+RAINBOW = [
+    (255, 0, 0),
+    (255, 127, 0),
+    (255, 255, 0),
+    (127, 255, 0),
+    (0, 255, 0),
+    (0, 255, 127),
+    (0, 255, 255),
+    (0, 127, 255),
+    (0, 0, 255),
+    (127, 0, 255),
+    (255, 0, 255),
+    (255, 0, 127),
+]
+
+
+def rainbow_wheel(pos: int):
     """Generate rainbow colors across 0-255 positions."""
     if pos < 0 or pos > 255:
         r = g = b = 0
