@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+import rgbserver
+
 with open('README.md') as f:
     long_description = f.read()
 
@@ -8,7 +10,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='rgbserver',
-    version='0.0.1',
+    version=rgbserver.__version__,
     description='RGB strip controller for Raspberry PI with REST API',
     long_description=long_description,
     long_description_content_type='text/markdown',
