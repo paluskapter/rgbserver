@@ -1,3 +1,4 @@
+import sys
 from multiprocessing import Process
 from multiprocessing.managers import SyncManager
 
@@ -7,8 +8,8 @@ from control import RGBController
 
 app = Flask(__name__)
 rgb = RGBController()
-proc = Process()
 
+proc = Process()
 manager = SyncManager()
 manager.start()
 state = manager.list()
@@ -115,4 +116,5 @@ def stop_process():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=80)
+    port = sys.argv[1]
+    app.run(debug=True, host='0.0.0.0', port=port)
