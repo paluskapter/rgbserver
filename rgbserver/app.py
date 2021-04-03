@@ -1,9 +1,10 @@
 from multiprocessing import Process
 from multiprocessing.managers import SyncManager
 from pathlib import Path
+from typing import Callable, Tuple
 
 import boto3
-import requests as requests
+import requests
 from flask import Flask, render_template
 
 from config import Config
@@ -39,7 +40,7 @@ def fire():
 
 @app.route('/rainbow')
 @app.route('/rainbow/<int:wait_ms>')
-def rainbow(wait_ms=0):
+def rainbow(wait_ms: int = 0):
     start_process(rgb.rainbow, (wait_ms,))
     return 'rainbow'
 
@@ -52,7 +53,7 @@ def rainbow_color_wipe():
 
 @app.route('/rainbow_fade')
 @app.route('/rainbow_fade/<int:brightness>')
-def rainbow_fade(brightness=255):
+def rainbow_fade(brightness: int = 255):
     start_process(rgb.rainbow_fade, (brightness,))
     return 'rainbow_fade'
 
@@ -82,31 +83,31 @@ def snake_rainbow():
 
 
 @app.route('/static_color/<int:red>/<int:green>/<int:blue>')
-def static_color(red, green, blue):
+def static_color(red: int, green: int, blue: int):
     start_process(rgb.static_color, (red, green, blue))
     return 'static_color'
 
 
 @app.route('/static_color_name/<name>')
-def static_color_name(name):
+def static_color_name(name: str):
     start_process(rgb.static_color_name, (name,))
     return 'static_color_name'
 
 
 @app.route('/static_gradient/<int:r1>/<int:g1>/<int:b1>/<int:r2>/<int:g2>/<int:b2>')
-def static_gradient(r1, g1, b1, r2, g2, b2):
+def static_gradient(r1: int, g1: int, b1: int, r2: int, g2: int, b2: int):
     start_process(rgb.static_gradient, ((r1, g1, b1), (r2, g2, b2)))
     return 'static_gradient'
 
 
 @app.route('/strobe')
 @app.route('/strobe/<int:wait_ms>')
-def strobe(wait_ms=300):
+def strobe(wait_ms: int = 300):
     start_process(rgb.strobe, (wait_ms,))
     return 'strobe'
 
 
-def start_process(func, args=()):
+def start_process(func: Callable, args: Tuple = ()):
     global proc, state
     proc = Process(target=func, args=(state,) + args)
     proc.start()
@@ -120,16 +121,16 @@ def stop_process():
         proc.join()
 
 
-def sqs_reader(config):
-    client = boto3.client('sqs', region_name=config.aws_region, aws_access_key_id=config.aws_key,
-                          aws_secret_access_key=config.aws_secret)
+def sqs_reader(conf: Config):
+    client = boto3.client('sqs', region_name=conf.aws_region, aws_access_key_id=conf.aws_key,
+                          aws_secret_access_key=conf.aws_secret)
     while True:
-        response = client.receive_message(QueueUrl=config.sqs_url, AttributeNames=[], MessageAttributeNames=[],
+        response = client.receive_message(QueueUrl=conf.sqs_url, AttributeNames=[], MessageAttributeNames=[],
                                           MaxNumberOfMessages=1, VisibilityTimeout=30, WaitTimeSeconds=20)
         if 'Messages' in response:
             message = response['Messages'][0]
-            requests.get("http://localhost:" + str(config.port) + "/" + message['Body'])
-            client.delete_message(QueueUrl=config.sqs_url, ReceiptHandle=message['ReceiptHandle'])
+            requests.get("http://localhost:" + str(conf.port) + "/" + message['Body'])
+            client.delete_message(QueueUrl=conf.sqs_url, ReceiptHandle=message['ReceiptHandle'])
 
 
 if config.sqs_url:

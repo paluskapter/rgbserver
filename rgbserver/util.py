@@ -1,7 +1,8 @@
 from colorsys import hls_to_rgb
 from random import random
+from typing import Generator, List, Tuple
 
-RAINBOW = [
+rainbow_list: List[Tuple[int, int, int]] = [
     (255, 0, 0),
     (255, 127, 0),
     (255, 255, 0),
@@ -17,7 +18,15 @@ RAINBOW = [
 ]
 
 
-def rainbow_wheel(pos: int):
+def gradient_color(pos: int, c1: Tuple[int, int, int], c2: Tuple[int, int, int], length: int) -> Tuple[int, int, int]:
+    """Calculates the color for a given pixel in a gradient effect."""
+    return (
+        int(pos * (c2[0] - c1[0]) / length + float(c1[0])),
+        int(pos * (c2[1] - c1[1]) / length + float(c1[1])),
+        int(pos * (c2[2] - c1[2]) / length + float(c1[2])))
+
+
+def rainbow_wheel(pos: int) -> Tuple[int, int, int]:
     """Generate rainbow colors across 0-255 positions."""
     if pos < 0 or pos > 255:
         r = g = b = 0
@@ -38,7 +47,7 @@ def rainbow_wheel(pos: int):
     return r, g, b
 
 
-def rainbow_color_generator(brightness: int = 255):
+def rainbow_color_generator(brightness: int = 255) -> Generator[Tuple[int, int, int], None, None]:
     """Returns an iterator with all the rainbow colors."""
     r = brightness
     g = 0
@@ -67,14 +76,6 @@ def rainbow_color_generator(brightness: int = 255):
             yield r, g, b
 
 
-def random_color():
+def random_color() -> List[int]:
     """Random color generator."""
     return [int(255 * x) for x in hls_to_rgb(random(), 0.5, 1)]
-
-
-def gradient_color(pos, c1, c2, pixels):
-    """Calculates the color for a given pixel in a gradient effect."""
-    return (
-        int(pos * (c2[0] - c1[0]) / pixels + float(c1[0])),
-        int(pos * (c2[1] - c1[1]) / pixels + float(c1[1])),
-        int(pos * (c2[2] - c1[2]) / pixels + float(c1[2])))
