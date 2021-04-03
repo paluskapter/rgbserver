@@ -1,7 +1,7 @@
 from multiprocessing import Process
 from multiprocessing.managers import SyncManager
 from pathlib import Path
-from typing import Callable, Tuple
+from typing import Callable, List, Tuple
 
 import boto3
 import requests
@@ -17,7 +17,7 @@ rgb = RGBController(config)
 proc = Process()
 manager = SyncManager()
 manager.start()
-state = manager.list()
+color_state = manager.list()
 
 
 @app.route('/')
@@ -27,87 +27,87 @@ def index():
 
 @app.route('/clear')
 def clear():
-    start_process(rgb.clear)
+    start_process(color_state, rgb.clear)
     return 'clear'
 
 
 @app.route('/fire')
 def fire():
-    start_process(rgb.fire)
+    start_process(color_state, rgb.fire)
     return 'fire'
 
 
 @app.route('/rainbow')
 @app.route('/rainbow/<int:wait_ms>')
 def rainbow(wait_ms: int = 0):
-    start_process(rgb.rainbow, (wait_ms,))
+    start_process(color_state, rgb.rainbow, (wait_ms,))
     return 'rainbow'
 
 
 @app.route('/rainbow_color_wipe')
 def rainbow_color_wipe():
-    start_process(rgb.rainbow_color_wipe)
+    start_process(color_state, rgb.rainbow_color_wipe)
     return 'rainbow_color_wipe'
 
 
 @app.route('/rainbow_fade')
 @app.route('/rainbow_fade/<int:brightness>')
 def rainbow_fade(brightness: int = 255):
-    start_process(rgb.rainbow_fade, (brightness,))
+    start_process(color_state, rgb.rainbow_fade, (brightness,))
     return 'rainbow_fade'
 
 
 @app.route('/random_fade')
 def random_fade():
-    start_process(rgb.random_fade)
+    start_process(color_state, rgb.random_fade)
     return 'random_fade'
 
 
 @app.route('/snake_color')
 def snake_color():
-    start_process(rgb.snake, ("color",))
+    start_process(color_state, rgb.snake, ("color",))
     return 'snake_color'
 
 
 @app.route('/snake_fade')
 def snake_fade():
-    start_process(rgb.snake, ("fade",))
+    start_process(color_state, rgb.snake, ("fade",))
     return 'snake_fade'
 
 
 @app.route('/snake_rainbow')
 def snake_rainbow():
-    start_process(rgb.snake, ("rainbow",))
+    start_process(color_state, rgb.snake, ("rainbow",))
     return 'snake_rainbow'
 
 
 @app.route('/static_color/<int:red>/<int:green>/<int:blue>')
 def static_color(red: int, green: int, blue: int):
-    start_process(rgb.static_color, (red, green, blue))
+    start_process(color_state, rgb.static_color, (red, green, blue))
     return 'static_color'
 
 
 @app.route('/static_color_name/<name>')
 def static_color_name(name: str):
-    start_process(rgb.static_color_name, (name,))
+    start_process(color_state, rgb.static_color_name, (name,))
     return 'static_color_name'
 
 
 @app.route('/static_gradient/<int:r1>/<int:g1>/<int:b1>/<int:r2>/<int:g2>/<int:b2>')
 def static_gradient(r1: int, g1: int, b1: int, r2: int, g2: int, b2: int):
-    start_process(rgb.static_gradient, ((r1, g1, b1), (r2, g2, b2)))
+    start_process(color_state, rgb.static_gradient, ((r1, g1, b1), (r2, g2, b2)))
     return 'static_gradient'
 
 
 @app.route('/strobe')
 @app.route('/strobe/<int:wait_ms>')
 def strobe(wait_ms: int = 300):
-    start_process(rgb.strobe, (wait_ms,))
+    start_process(color_state, rgb.strobe, (wait_ms,))
     return 'strobe'
 
 
-def start_process(func: Callable, args: Tuple = ()):
-    global proc, state
+def start_process(state: List[Tuple[int, int, int]], func: Callable, args: Tuple = ()):
+    global proc
     proc = Process(target=func, args=(state,) + args)
     proc.start()
 

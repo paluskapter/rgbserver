@@ -17,12 +17,12 @@ class RGBController:
     def __del__(self) -> None:
         self.pixels.deinit()
 
-    def clear(self, state) -> None:
+    def clear(self, state: List[Tuple[int, int, int]]) -> None:
         """Clears the strip one by one."""
         self.static_color_list(state)
         self.color_wipe(state, (0, 0, 0))
 
-    def fire(self, state) -> None:
+    def fire(self, state: List[Tuple[int, int, int]]) -> None:
         """Fire effect."""
         while True:
             for i in itertools.chain(range(40), range(self.pixels.n - 25, self.pixels.n)):
@@ -37,7 +37,7 @@ class RGBController:
             self.save_state(state)
             sleep(randint(100, 200) / 1000.0)
 
-    def rainbow(self, state, wait_ms: int = 0) -> None:
+    def rainbow(self, state: List[Tuple[int, int, int]], wait_ms: int = 0) -> None:
         """Whole rainbow moves across the strip."""
         while True:
             for j in range(255):
@@ -48,12 +48,12 @@ class RGBController:
                 self.save_state(state)
                 sleep(wait_ms / 1000.0)
 
-    def rainbow_color_wipe(self, state) -> None:
+    def rainbow_color_wipe(self, state: List[Tuple[int, int, int]]) -> None:
         """Wipe 12 colors across display a pixel at a time."""
         for color in itertools.cycle(rainbow_list):
             self.color_wipe(state, color, 10)
 
-    def rainbow_fade(self, state, brightness: int = 255) -> None:
+    def rainbow_fade(self, state: List[Tuple[int, int, int]], brightness: int = 255) -> None:
         """Fades between all the colors in the rainbow."""
         color_generator = rainbow_color_generator(brightness)
         wait = int((-1 / 5.0 * brightness) + 50) if brightness <= 200 else 10
@@ -62,7 +62,7 @@ class RGBController:
             self.static_color(state, r, g, b, wait)
             self.save_state(state)
 
-    def random_fade(self, state) -> None:
+    def random_fade(self, state: List[Tuple[int, int, int]]) -> None:
         """Randomly fades between colors."""
         old_r, old_g, old_b = random_color()
         self.static_color(state, old_r, old_g, old_b)
@@ -90,7 +90,7 @@ class RGBController:
                 self.static_color(state, old_r, old_g, old_b, 10)
                 self.save_state(state)
 
-    def snake(self, state, method: str = "color") -> None:
+    def snake(self, state: List[Tuple[int, int, int]], method: str = "color") -> None:
         """
         Snake implementation for all 3 methods:
         color: Snake with changing color.
@@ -128,7 +128,7 @@ class RGBController:
             self.save_state(state)
             sleep(0.01)
 
-    def static_color(self, state, r: int, g: int, b: int, wait_ms: int = 0) -> None:
+    def static_color(self, state: List[Tuple[int, int, int]], r: int, g: int, b: int, wait_ms: int = 0) -> None:
         """Switches color of the whole strip."""
         if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
             self.pixels.fill((r, g, b))
@@ -138,7 +138,7 @@ class RGBController:
         else:
             self.show_error(state)
 
-    def static_color_name(self, state, name: str, wait_ms: int = 0) -> None:
+    def static_color_name(self, state: List[Tuple[int, int, int]], name: str, wait_ms: int = 0) -> None:
         """Switches color of the whole strip by name."""
         try:
             (red, green, blue) = name_to_rgb(name)
@@ -146,7 +146,8 @@ class RGBController:
         except ValueError:
             self.show_error(state)
 
-    def static_gradient(self, state, c1: Tuple[int, int, int], c2: Tuple[int, int, int]) -> None:
+    def static_gradient(self, state: List[Tuple[int, int, int]], c1: Tuple[int, int, int],
+                        c2: Tuple[int, int, int]) -> None:
         """Gradient between 2 colors."""
         if all([0 <= i <= 255 and 0 <= j <= 255 for i in c1 for j in c2]):
             for i in range(self.pixels.n):
@@ -156,14 +157,14 @@ class RGBController:
         else:
             self.show_error(state)
 
-    def strobe(self, state, wait_ms: int = 300) -> None:
+    def strobe(self, state: List[Tuple[int, int, int]], wait_ms: int = 300) -> None:
         """Strobe effect."""
         while True:
             r, g, b = random_color()
             self.static_color(state, r, g, b, wait_ms)
             self.save_state(state)
 
-    def color_wipe(self, state, color: Tuple[int, int, int], wait_ms: int = 0) -> None:
+    def color_wipe(self, state: List[Tuple[int, int, int]], color: Tuple[int, int, int], wait_ms: int = 0) -> None:
         """Wipe color across display a pixel at a time."""
         for i in range(self.pixels.n):
             self.pixels[i] = color
@@ -171,7 +172,7 @@ class RGBController:
             self.save_state(state)
             sleep(wait_ms / 1000.0)
 
-    def save_state(self, state) -> None:
+    def save_state(self, state: List[Tuple[int, int, int]]) -> None:
         """Saves the state of the strip between processes."""
         state[:] = []
         state.extend([self.pixels[i] for i in range(self.pixels.n)])
@@ -183,7 +184,7 @@ class RGBController:
         self.pixels.show()
         sleep(wait_ms / 1000.0)
 
-    def show_error(self, state) -> None:
+    def show_error(self, state: List[Tuple[int, int, int]]) -> None:
         """Flashes red twice."""
         for i in range(2):
             self.pixels.fill((0, 0, 0))
