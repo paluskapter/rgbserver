@@ -36,7 +36,7 @@ class RGBController:
                     randint(10, 50) if random() > 0.7 else 0,
                     0)
             self.pixels.show()
-            self.save_state(state, self.save_pixels())
+            self.save_state(state)
             sleep(randint(100, 200) / 1000.0)
 
     def rainbow(self, state, wait_ms: int = 0):
@@ -47,7 +47,7 @@ class RGBController:
                     pixel_index = (i * 256 // Config.LENGTH) + j
                     self.pixels[i] = rainbow_wheel(pixel_index & 255)
                 self.pixels.show()
-                self.save_state(state, self.save_pixels())
+                self.save_state(state)
                 sleep(wait_ms / 1000.0)
 
     def rainbow_color_wipe(self, state):
@@ -61,13 +61,13 @@ class RGBController:
         wait = int((-1 / 5.0 * brightness) + 50) if brightness <= 200 else 10
 
         for r, g, b in color_generator:
-            self.static_color(r, g, b, wait)
-            self.save_state(state, self.save_pixels())
+            self.static_color(state, r, g, b, wait)
+            self.save_state(state)
 
     def random_fade(self, state):
         """Randomly fades between colors."""
         old_r, old_g, old_b = random_color()
-        self.static_color(old_r, old_g, old_b)
+        self.static_color(state, old_r, old_g, old_b)
 
         while True:
             new_r, new_g, new_b = random_color()
@@ -89,8 +89,8 @@ class RGBController:
                     old_g = (old_g - 1) if dist_g > 0 else old_g + 1
                 if i % step_b < 1:
                     old_b = (old_b - 1) if dist_b > 0 else old_b + 1
-                self.static_color(old_r, old_g, old_b, 10)
-                self.save_state(state, self.save_pixels())
+                self.static_color(state, old_r, old_g, old_b, 10)
+                self.save_state(state)
 
     def snake(self, state, method="color"):
         """
@@ -127,33 +127,34 @@ class RGBController:
                 start -= 1
 
             self.pixels.show()
-            self.save_state(state, self.save_pixels())
+            self.save_state(state)
             sleep(0.01)
 
-    def static_color(self, r: int, g: int, b: int, wait_ms: int = 0):
+    def static_color(self, state, r: int, g: int, b: int, wait_ms: int = 0):
         """Switches color of the whole strip."""
         if 0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255:
             self.pixels.fill((r, g, b))
             self.pixels.show()
+            self.save_state(state)
             sleep(wait_ms / 1000.0)
         else:
             self.show_error()
 
-    def static_color_name(self, name, wait_ms=0):
+    def static_color_name(self, state, name, wait_ms=0):
         """Switches color of the whole strip by name."""
         try:
             (red, green, blue) = name_to_rgb(name)
-            self.static_color(red, green, blue, wait_ms)
-            self.pixels.show()
+            self.static_color(state, red, green, blue, wait_ms)
         except ValueError:
             self.show_error()
 
-    def static_gradient(self, c1, c2):
+    def static_gradient(self, state, c1, c2):
         """Gradient between 2 colors."""
         if all([0 <= i <= 255 and 0 <= j <= 255 for i in c1 for j in c2]):
             for i in range(Config.LENGTH):
                 self.pixels[i] = gradient_color(i, c1, c2, Config.LENGTH)
             self.pixels.show()
+            self.save_state(state)
         else:
             self.show_error()
 
@@ -161,26 +162,25 @@ class RGBController:
         """Strobe effect."""
         while True:
             r, g, b = random_color()
-            self.static_color(r, g, b, wait_ms)
-            self.save_state(state, self.save_pixels())
+            self.static_color(state, r, g, b, wait_ms)
+            self.save_state(state)
 
     def color_wipe(self, state, color: Tuple[int, int, int], wait_ms: int = 0):
         """Wipe color across display a pixel at a time."""
         for i in range(Config.LENGTH):
             self.pixels[i] = color
             self.pixels.show()
-            self.save_state(state, self.save_pixels())
+            self.save_state(state)
             sleep(wait_ms / 1000.0)
 
     def save_pixels(self):
         """Saves current pixel colors."""
         return [self.pixels[i] for i in range(Config.LENGTH)]
 
-    @staticmethod
-    def save_state(state, colors):
+    def save_state(self, state):
         """Saves the state of the strip between processes."""
         d = state[0]
-        d['colors'] = colors
+        d['colors'] = self.save_pixels()
         state[0] = d
 
     def static_color_list(self, color: List[Tuple[int, int, int]], wait_ms: int = 0):

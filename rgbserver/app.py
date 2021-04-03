@@ -79,19 +79,19 @@ def snake_rainbow():
 
 @app.route('/static_color/<int:red>/<int:green>/<int:blue>')
 def static_color(red, green, blue):
-    rgb.static_color(red, green, blue)
+    start_process(rgb.static_color, (red, green, blue))
     return 'static_color'
 
 
 @app.route('/static_color_name/<name>')
 def static_color_name(name):
-    rgb.static_color_name(name)
+    start_process(rgb.static_color_name, (name,))
     return 'static_color_name'
 
 
 @app.route('/static_gradient/<int:r1>/<int:g1>/<int:b1>/<int:r2>/<int:g2>/<int:b2>')
 def static_gradient(r1, g1, b1, r2, g2, b2):
-    rgb.static_gradient((r1, g1, b1), (r2, g2, b2))
+    start_process(rgb.static_gradient, ((r1, g1, b1), (r2, g2, b2)))
     return 'static_gradient'
 
 
