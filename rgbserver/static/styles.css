@@ -1,0 +1,13 @@
+.center {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center
+}
+
+.color-picker-div {
+    margin: 20px 10px
+}
+
+button {
+    margin: 5px 3px
+}
