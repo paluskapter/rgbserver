@@ -1,15 +1,17 @@
+import json
+
 import board
-import neopixel
 
 
 class Config:
-    PORT = 80
-    SQS_URL = ""
-    AWS_REGION = ""
-    AWS_KEY = ""
-    AWS_SECRET = ""
-    GPIO = board.D18
-    LENGTH = 300
-    BRIGHTNESS = 1
-    AUTO_WRITE = False
-    ORDER = neopixel.GRB
+    def __init__(self, path):
+        with path.open(mode='r') as file:
+            config = json.load(file)
+        self.port = config["port"]
+        self.gpio = getattr(board, "D" + str(config["gpio"]))
+        self.length = config["length"]
+        self.order = config["order"]
+        self.sqs_url = config["sqs_url"]
+        self.aws_region = config["aws_region"]
+        self.aws_key = config["aws_key"]
+        self.aws_secret = config["aws_secret"]

@@ -1,0 +1,10 @@
+{
+  "port": 80,
+  "gpio": 18,
+  "length": 300,
+  "order": "GRB",
+  "sqs_url": "https://sqs.eu-west-1.amazonaws.com/************/name.fifo",
+  "aws_region": "eu-west-1",
+  "aws_key": "********************",
+  "aws_secret": "****************************************"
+}

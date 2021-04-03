@@ -1,5 +1,6 @@
 from multiprocessing import Process
 from multiprocessing.managers import SyncManager
+from pathlib import Path
 
 import boto3
 from flask import Flask, render_template
@@ -8,7 +9,8 @@ from config import Config
 from control import RGBController
 
 app = Flask(__name__)
-rgb = RGBController()
+config = Config(Path(__file__).parent.parent / "config.json")
+rgb = RGBController(config)
 
 proc = Process()
 manager = SyncManager()
@@ -117,16 +119,16 @@ def stop_process():
         proc.join()
 
 
-def sqs_reader():
-    client = boto3.client('sqs', region_name=Config.AWS_REGION, aws_access_key_id=Config.AWS_KEY,
-                          aws_secret_access_key=Config.AWS_SECRET)
+def sqs_reader(config):
+    client = boto3.client('sqs', region_name=config.aws_region, aws_access_key_id=config.aws_key,
+                          aws_secret_access_key=config.aws_secret)
     while True:
-        response = client.receive_message(QueueUrl=Config.SQS_URL, AttributeNames=[], MessageAttributeNames=[],
+        response = client.receive_message(QueueUrl=config.sqs_url, AttributeNames=[], MessageAttributeNames=[],
                                           MaxNumberOfMessages=1, VisibilityTimeout=30, WaitTimeSeconds=20)
         if 'Messages' in response:
             message = response['Messages'][0]
             call_endpoint(message['Body'])
-            client.delete_message(QueueUrl=Config.SQS_URL, ReceiptHandle=message['ReceiptHandle'])
+            client.delete_message(QueueUrl=config.sqs_url, ReceiptHandle=message['ReceiptHandle'])
 
 
 def call_endpoint(path):
@@ -138,10 +140,8 @@ def call_endpoint(path):
     else:
         globals()[path]()
 
+if config.sqs_url:
+    reader = Process(target=sqs_reader, args=(config,))
+    reader.start()
 
-if __name__ == '__main__':
-    if Config.SQS_URL:
-        reader = Process(target=sqs_reader, args=())
-        reader.start()
-
-    app.run(debug=True, host='0.0.0.0', port=Config.PORT)
+app.run(host='0.0.0.0', port=config.port)
