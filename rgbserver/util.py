@@ -38,7 +38,7 @@ def rainbow_wheel(pos: int):
     return r, g, b
 
 
-def rainbow_color_generator(brightness: int):
+def rainbow_color_generator(brightness: int = 255):
     """Returns an iterator with all the rainbow colors."""
     r = brightness
     g = 0

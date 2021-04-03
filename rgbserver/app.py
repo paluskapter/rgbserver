@@ -47,8 +47,9 @@ def rainbow_color_wipe():
 
 
 @app.route('/rainbow_fade')
-def rainbow_fade():
-    start_process(rgb.rainbow_fade)
+@app.route('/rainbow_fade/<int:brightness>')
+def rainbow_fade(brightness=255):
+    start_process(rgb.rainbow_fade, (brightness,))
     return 'rainbow_fade'
 
 
