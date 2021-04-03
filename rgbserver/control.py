@@ -12,7 +12,6 @@ from util import gradient_color, rainbow_color_generator, rainbow_list, rainbow_
 
 class RGBController:
     def __init__(self, conf: Config) -> None:
-        self.length = conf.length
         self.pixels = neopixel.NeoPixel(conf.gpio, conf.length, brightness=1, auto_write=False, pixel_order=conf.order)
 
     def __del__(self) -> None:
@@ -26,10 +25,10 @@ class RGBController:
     def fire(self, state) -> None:
         """Fire effect."""
         while True:
-            for i in itertools.chain(range(40), range(self.length - 25, self.length)):
+            for i in itertools.chain(range(40), range(self.pixels.n - 25, self.pixels.n)):
                 self.pixels[i] = (randint(180, 255), 0, 0)
 
-            for i in range(40, self.length - 25):
+            for i in range(40, self.pixels.n - 25):
                 self.pixels[i] = (
                     randint(180, 255),
                     randint(10, 50) if random() > 0.7 else 0,
@@ -42,8 +41,8 @@ class RGBController:
         """Whole rainbow moves across the strip."""
         while True:
             for j in range(255):
-                for i in range(self.length):
-                    pixel_index = (i * 256 // self.length) + j
+                for i in range(self.pixels.n):
+                    pixel_index = (i * 256 // self.pixels.n) + j
                     self.pixels[i] = rainbow_wheel(pixel_index & 255)
                 self.pixels.show()
                 self.save_state(state)
@@ -108,11 +107,11 @@ class RGBController:
             r, g, b = next(fade_color_gen)
             fade_color = (r, g, b)
 
-            if start == self.length - length or start == 0:
+            if start == self.pixels.n - length or start == 0:
                 direction = not direction
                 normal_color = rainbow_list[next(count) % 12]
 
-            for i in itertools.chain(range(start), range(start + length, self.length)):
+            for i in itertools.chain(range(start), range(start + length, self.pixels.n)):
                 self.pixels[i] = (0, 0, 0)
 
             for i in range(start, start + length):
@@ -150,8 +149,8 @@ class RGBController:
     def static_gradient(self, state, c1: Tuple[int, int, int], c2: Tuple[int, int, int]) -> None:
         """Gradient between 2 colors."""
         if all([0 <= i <= 255 and 0 <= j <= 255 for i in c1 for j in c2]):
-            for i in range(self.length):
-                self.pixels[i] = gradient_color(i, c1, c2, self.length)
+            for i in range(self.pixels.n):
+                self.pixels[i] = gradient_color(i, c1, c2, self.pixels.n)
             self.pixels.show()
             self.save_state(state)
         else:
@@ -166,7 +165,7 @@ class RGBController:
 
     def color_wipe(self, state, color: Tuple[int, int, int], wait_ms: int = 0) -> None:
         """Wipe color across display a pixel at a time."""
-        for i in range(self.length):
+        for i in range(self.pixels.n):
             self.pixels[i] = color
             self.pixels.show()
             self.save_state(state)
@@ -175,12 +174,12 @@ class RGBController:
     def save_state(self, state) -> None:
         """Saves the state of the strip between processes."""
         d = state[0]
-        d['colors'] = [self.pixels[i] for i in range(self.length)]
+        d['colors'] = [self.pixels[i] for i in range(self.pixels.n)]
         state[0] = d
 
     def static_color_list(self, color: List[Tuple[int, int, int]], wait_ms: int = 0) -> None:
         """Instantly switches color from a list of colors."""
-        for i in range(self.length):
+        for i in range(self.pixels.n):
             self.pixels[i] = color[i]
         self.pixels.show()
         sleep(wait_ms / 1000.0)
