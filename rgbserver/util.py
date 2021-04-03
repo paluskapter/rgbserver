@@ -56,22 +56,22 @@ def rainbow_color_generator(brightness: int = 255) -> Generator[Tuple[int, int, 
     yield r, g, b
 
     while True:
-        for i in range(brightness):
+        for _ in range(brightness):
             g += 1
             yield r, g, b
-        for i in range(brightness):
+        for _ in range(brightness):
             r -= 1
             yield r, g, b
-        for i in range(brightness):
+        for _ in range(brightness):
             b += 1
             yield r, g, b
-        for i in range(brightness):
+        for _ in range(brightness):
             g -= 1
             yield r, g, b
-        for i in range(brightness):
+        for _ in range(brightness):
             r += 1
             yield r, g, b
-        for i in range(brightness):
+        for _ in range(brightness):
             b -= 1
             yield r, g, b
 

@@ -107,7 +107,7 @@ class RGBController:
             r, g, b = next(fade_color_gen)
             fade_color = (r, g, b)
 
-            if start == self.pixels.n - length or start == 0:
+            if start in (0, self.pixels.n - length):
                 direction = not direction
                 normal_color = rainbow_list[next(count) % 12]
 
@@ -149,7 +149,7 @@ class RGBController:
     def static_gradient(self, state: List[Tuple[int, int, int]], c1: Tuple[int, int, int],
                         c2: Tuple[int, int, int]) -> None:
         """Gradient between 2 colors."""
-        if all([0 <= i <= 255 and 0 <= j <= 255 for i in c1 for j in c2]):
+        if all(0 <= i <= 255 and 0 <= j <= 255 for i in c1 for j in c2):
             for i in range(self.pixels.n):
                 self.pixels[i] = gradient_color(i, c1, c2, self.pixels.n)
             self.pixels.show()
@@ -186,7 +186,7 @@ class RGBController:
 
     def show_error(self, state: List[Tuple[int, int, int]]) -> None:
         """Flashes red twice."""
-        for i in range(2):
+        for _ in range(2):
             self.pixels.fill((0, 0, 0))
             self.pixels.show()
             sleep(0.1)

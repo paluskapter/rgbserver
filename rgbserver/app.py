@@ -17,7 +17,7 @@ rgb = RGBController(config)
 proc = Process()
 manager = SyncManager()
 manager.start()
-color_state = manager.list()
+color_state: List[Tuple[int, int, int]] = manager.list()
 
 
 @app.route('/')
