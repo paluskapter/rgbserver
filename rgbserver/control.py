@@ -19,7 +19,7 @@ class RGBController:
 
     def clear(self, state) -> None:
         """Clears the strip one by one."""
-        self.static_color_list(state[0]['colors'])
+        self.static_color_list(state)
         self.color_wipe(state, (0, 0, 0))
 
     def fire(self, state) -> None:
@@ -173,9 +173,8 @@ class RGBController:
 
     def save_state(self, state) -> None:
         """Saves the state of the strip between processes."""
-        d = state[0]
-        d['colors'] = [self.pixels[i] for i in range(self.pixels.n)]
-        state[0] = d
+        state[:] = []
+        state.extend([self.pixels[i] for i in range(self.pixels.n)])
 
     def static_color_list(self, color: List[Tuple[int, int, int]], wait_ms: int = 0) -> None:
         """Instantly switches color from a list of colors."""
@@ -186,7 +185,6 @@ class RGBController:
 
     def show_error(self, state) -> None:
         """Flashes red twice."""
-        self.save_state(state)
         for i in range(2):
             self.pixels.fill((0, 0, 0))
             self.pixels.show()
@@ -198,4 +196,4 @@ class RGBController:
         self.pixels.fill((0, 0, 0))
         self.pixels.show()
         sleep(0.1)
-        self.static_color_list(state[0]['colors'])
+        self.static_color_list(state)

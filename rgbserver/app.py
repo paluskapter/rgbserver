@@ -18,7 +18,6 @@ proc = Process()
 manager = SyncManager()
 manager.start()
 state = manager.list()
-state.append({})
 
 
 @app.route('/')
