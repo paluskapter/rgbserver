@@ -1,4 +1,5 @@
 adafruit-circuitpython-neopixel
 boto3
 flask
+requests
 webcolors

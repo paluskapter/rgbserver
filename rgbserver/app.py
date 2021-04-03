@@ -3,6 +3,7 @@ from multiprocessing.managers import SyncManager
 from pathlib import Path
 
 import boto3
+import requests as requests
 from flask import Flask, render_template
 
 from config import Config
@@ -127,18 +128,9 @@ def sqs_reader(config):
                                           MaxNumberOfMessages=1, VisibilityTimeout=30, WaitTimeSeconds=20)
         if 'Messages' in response:
             message = response['Messages'][0]
-            call_endpoint(message['Body'])
+            requests.get("http://localhost:" + str(config.port) + "/" + message['Body'])
             client.delete_message(QueueUrl=config.sqs_url, ReceiptHandle=message['ReceiptHandle'])
 
-
-def call_endpoint(path):
-    stop_process()
-
-    if "/" in path:
-        path_split = path.split("/")
-        globals()[path_split[0]](path_split[1])
-    else:
-        globals()[path]()
 
 if config.sqs_url:
     reader = Process(target=sqs_reader, args=(config,))
