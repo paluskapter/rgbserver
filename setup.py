@@ -18,7 +18,7 @@ setup(
     author='Peter Paluska',
     author_email='paluskapter@gmail.com',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Framework :: Flask',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -27,13 +27,16 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: HTTP Servers',
         'Typing :: Typed'
     ],
-    keywords='raspberry pi neopixel ws2812 rest api',
+    keywords='raspberry pi neopixel ws2812 rest api sqs',
     packages=find_packages(exclude="tests"),
+    package_data={
+        'rgbserver': ['static/*', 'templates/*']
+    },
     python_requires='>=3, <4',
     install_requires=requirements,
     entry_points={
         'console_scripts': [
-            'run=app:run',
-        ],
-    },
+            'rgbserver=rgbserver.app:main',
+        ]
+    }
 )

@@ -7,8 +7,8 @@ import boto3
 import requests
 from flask import Flask, render_template
 
-from config import Config
-from control import RGBController
+from rgbserver.config import Config
+from rgbserver.control import RGBController
 
 
 class Webserver(Flask):

@@ -6,8 +6,8 @@ from typing import List, Tuple
 import neopixel
 from webcolors import name_to_rgb
 
-from config import Config
-from util import gradient_color, rainbow_color_generator, rainbow_list, rainbow_wheel, random, random_color
+from rgbserver.config import Config
+from rgbserver.util import gradient_color, rainbow_color_generator, rainbow_list, rainbow_wheel, random, random_color
 
 
 class RGBController:
