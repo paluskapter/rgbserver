@@ -1,7 +1,7 @@
+import sys
 from multiprocessing import Process
 from multiprocessing.managers import SyncManager
-from pathlib import Path
-from typing import Callable, List, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
 import boto3
 import requests
@@ -10,130 +10,126 @@ from flask import Flask, render_template
 from config import Config
 from control import RGBController
 
-app = Flask(__name__)
-config = Config(Path(__file__).parent.parent / "config.json")
-rgb = RGBController(config)
 
-proc = Process()
-manager = SyncManager()
-manager.start()
-color_state: List[Tuple[int, int, int]] = manager.list()
+class Webserver(Flask):
+    def __init__(self, location: str) -> None:
+        super().__init__(__name__)
+        self.rgb_config = Config(location)
+        self.rgb = RGBController(self.rgb_config)
+        self.proc = Process()
+        self.manager = SyncManager()
+        self.manager.start()
+        self.state: List[Tuple[int, int, int]] = self.manager.list()
 
+        self.before_request(self.stop_process)
+        self.add_url_rule('/', view_func=self.index)
+        self.add_url_rule('/clear', view_func=self.clear)
+        self.add_url_rule('/fire', view_func=self.fire)
+        self.add_url_rule('/rainbow', view_func=self.rainbow)
+        self.add_url_rule('/rainbow_color_wipe', view_func=self.rainbow_color_wipe)
+        self.add_url_rule('/rainbow_fade', view_func=self.rainbow_fade)
+        self.add_url_rule('/random_fade', view_func=self.random_fade)
+        self.add_url_rule('/snake_color', view_func=self.snake_color)
+        self.add_url_rule('/snake_fade', view_func=self.snake_fade)
+        self.add_url_rule('/snake_rainbow', view_func=self.snake_rainbow)
+        self.add_url_rule('/static_color/<int:red>/<int:green>/<int:blue>', view_func=self.static_color)
+        self.add_url_rule('/static_color_name/<name>', view_func=self.static_color_name)
+        self.add_url_rule('/static_gradient/<int:r1>/<int:g1>/<int:b1>/<int:r2>/<int:g2>/<int:b2>',
+                          view_func=self.static_gradient)
+        self.add_url_rule('/strobe', view_func=self.strobe)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+    def run(self, host: str = None, port: int = None, debug: bool = None, load_dotenv: bool = True,
+            **options: Optional[Any]) -> None:
+        if self.rgb_config.sqs_url:
+            reader = Process(target=self.sqs_reader, args=())
+            reader.start()
 
+        super().run('0.0.0.0', self.rgb_config.port, debug, load_dotenv, **options)
 
-@app.route('/clear')
-def clear():
-    start_process(rgb.clear)
-    return 'clear'
+    @staticmethod
+    def index() -> str:
+        return render_template('index.html')
 
+    def clear(self) -> str:
+        self.start_process(self.rgb.clear)
+        return 'clear'
 
-@app.route('/fire')
-def fire():
-    start_process(rgb.fire)
-    return 'fire'
+    def fire(self) -> str:
+        self.start_process(self.rgb.fire)
+        return 'fire'
 
+    def rainbow(self) -> str:
+        self.start_process(self.rgb.rainbow)
+        return 'rainbow'
 
-@app.route('/rainbow')
-@app.route('/rainbow/<int:wait_ms>')
-def rainbow(wait_ms: int = 0):
-    start_process(rgb.rainbow, (wait_ms,))
-    return 'rainbow'
+    def rainbow_color_wipe(self) -> str:
+        self.start_process(self.rgb.rainbow_color_wipe)
+        return 'rainbow_color_wipe'
 
+    def rainbow_fade(self) -> str:
+        self.start_process(self.rgb.rainbow_fade)
+        return 'rainbow_fade'
 
-@app.route('/rainbow_color_wipe')
-def rainbow_color_wipe():
-    start_process(rgb.rainbow_color_wipe)
-    return 'rainbow_color_wipe'
+    def random_fade(self) -> str:
+        self.start_process(self.rgb.random_fade)
+        return 'random_fade'
 
+    def snake_color(self) -> str:
+        self.start_process(self.rgb.snake, ("color",))
+        return 'snake_color'
 
-@app.route('/rainbow_fade')
-@app.route('/rainbow_fade/<int:brightness>')
-def rainbow_fade(brightness: int = 255):
-    start_process(rgb.rainbow_fade, (brightness,))
-    return 'rainbow_fade'
+    def snake_fade(self) -> str:
+        self.start_process(self.rgb.snake, ("fade",))
+        return 'snake_fade'
 
+    def snake_rainbow(self) -> str:
+        self.start_process(self.rgb.snake, ("rainbow",))
+        return 'snake_rainbow'
 
-@app.route('/random_fade')
-def random_fade():
-    start_process(rgb.random_fade)
-    return 'random_fade'
+    def static_color(self, red: int, green: int, blue: int) -> str:
+        self.start_process(self.rgb.static_color, (red, green, blue))
+        return 'static_color'
 
+    def static_color_name(self, name: str) -> str:
+        self.start_process(self.rgb.static_color_name, (name,))
+        return 'static_color_name'
 
-@app.route('/snake_color')
-def snake_color():
-    start_process(rgb.snake, ("color",))
-    return 'snake_color'
+    def static_gradient(self, r1: int, g1: int, b1: int, r2: int, g2: int, b2: int) -> str:
+        self.start_process(self.rgb.static_gradient, ((r1, g1, b1), (r2, g2, b2)))
+        return 'static_gradient'
 
+    def strobe(self) -> str:
+        self.start_process(self.rgb.strobe)
+        return 'strobe'
 
-@app.route('/snake_fade')
-def snake_fade():
-    start_process(rgb.snake, ("fade",))
-    return 'snake_fade'
+    def start_process(self, func: Callable, args: Tuple = ()) -> None:
+        self.proc = Process(target=func, args=(self.state,) + args)
+        self.proc.start()
 
+    def stop_process(self) -> None:
+        if self.proc.pid is not None:
+            self.proc.terminate()
+            self.proc.join()
 
-@app.route('/snake_rainbow')
-def snake_rainbow():
-    start_process(rgb.snake, ("rainbow",))
-    return 'snake_rainbow'
-
-
-@app.route('/static_color/<int:red>/<int:green>/<int:blue>')
-def static_color(red: int, green: int, blue: int):
-    start_process(rgb.static_color, (red, green, blue))
-    return 'static_color'
-
-
-@app.route('/static_color_name/<name>')
-def static_color_name(name: str):
-    start_process(rgb.static_color_name, (name,))
-    return 'static_color_name'
-
-
-@app.route('/static_gradient/<int:r1>/<int:g1>/<int:b1>/<int:r2>/<int:g2>/<int:b2>')
-def static_gradient(r1: int, g1: int, b1: int, r2: int, g2: int, b2: int):
-    start_process(rgb.static_gradient, ((r1, g1, b1), (r2, g2, b2)))
-    return 'static_gradient'
-
-
-@app.route('/strobe')
-@app.route('/strobe/<int:wait_ms>')
-def strobe(wait_ms: int = 300):
-    start_process(rgb.strobe, (wait_ms,))
-    return 'strobe'
-
-
-def start_process(func: Callable, args: Tuple = ()):
-    global proc, color_state
-    proc = Process(target=func, args=(color_state,) + args)
-    proc.start()
-
-
-@app.before_request
-def stop_process():
-    global proc
-    if proc.pid is not None:
-        proc.terminate()
-        proc.join()
-
-
-def sqs_reader(conf: Config):
-    client = boto3.client('sqs', region_name=conf.aws_region, aws_access_key_id=conf.aws_key,
-                          aws_secret_access_key=conf.aws_secret)
-    while True:
-        response = client.receive_message(QueueUrl=conf.sqs_url, AttributeNames=[], MessageAttributeNames=[],
-                                          MaxNumberOfMessages=1, VisibilityTimeout=30, WaitTimeSeconds=20)
-        if 'Messages' in response:
-            message = response['Messages'][0]
-            requests.get("http://localhost:" + str(conf.port) + "/" + message['Body'])
-            client.delete_message(QueueUrl=conf.sqs_url, ReceiptHandle=message['ReceiptHandle'])
+    def sqs_reader(self) -> None:
+        client = boto3.client('sqs', region_name=self.rgb_config.aws_region,
+                              aws_access_key_id=self.rgb_config.aws_key,
+                              aws_secret_access_key=self.rgb_config.aws_secret)
+        while True:
+            response = client.receive_message(QueueUrl=self.rgb_config.sqs_url, AttributeNames=[],
+                                              MessageAttributeNames=[],
+                                              MaxNumberOfMessages=1, VisibilityTimeout=30, WaitTimeSeconds=20)
+            if 'Messages' in response:
+                message = response['Messages'][0]
+                requests.get("http://localhost:" + str(self.rgb_config.port) + "/" + message['Body'])
+                client.delete_message(QueueUrl=self.rgb_config.sqs_url, ReceiptHandle=message['ReceiptHandle'])
 
 
-if config.sqs_url:
-    reader = Process(target=sqs_reader, args=(config,))
-    reader.start()
+def main() -> None:
+    if len(sys.argv) != 2:
+        exit("The only parameter needed is the json config file's absolute path!")
+    Webserver(sys.argv[1]).run()
 
-app.run(host='0.0.0.0', port=config.port)
+
+if __name__ == "__main__":
+    main()

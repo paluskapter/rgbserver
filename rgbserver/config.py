@@ -4,8 +4,8 @@ import board
 
 
 class Config:
-    def __init__(self, path):
-        with path.open(mode='r') as file:
+    def __init__(self, path: str):
+        with open(path, 'r') as file:
             config = json.load(file)
         self.port = config["port"]
         self.gpio = getattr(board, "D" + str(config["gpio"]))
