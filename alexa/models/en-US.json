@@ -1,0 +1,229 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "rgb strip",
+      "intents": [
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "clear",
+          "slots": [],
+          "samples": [
+            "turn itself off",
+            "clear",
+            "clear mode",
+            "clear itself",
+            "clear the strip"
+          ]
+        },
+        {
+          "name": "rainbow",
+          "slots": [],
+          "samples": [
+            "rainbow",
+            "rainbow mode",
+            "change to rainbow",
+            "change to rainbow mode",
+            "turn on rainbow",
+            "switch to rainbow",
+            "switch to rainbow mode",
+            "turn on rainbow mode"
+          ]
+        },
+        {
+          "name": "fire",
+          "slots": [],
+          "samples": [
+            "fire",
+            "fire mode",
+            "change to fire mode",
+            "change to fire",
+            "switch to fire mode",
+            "switch to fire",
+            "turn on fire",
+            "turn on fire mode"
+          ]
+        },
+        {
+          "name": "rainbow_color_wipe",
+          "slots": [],
+          "samples": [
+            "rainbow color wipe",
+            "rainbow color wipe mode",
+            "change to rainbow color wipe",
+            "change to rainbow color wipe mode",
+            "switch to rainbow color wipe",
+            "switch to rainbow color wipe mode",
+            "turn on rainbow color wipe",
+            "turn on rainbow color wipe mode"
+          ]
+        },
+        {
+          "name": "rainbow_fade",
+          "slots": [],
+          "samples": [
+            "rainbow fade",
+            "rainbow fade mode",
+            "change to rainbow fade",
+            "change to rainbow fade mode",
+            "switch to rainbow fade",
+            "switch to rainbow fade mode",
+            "turn on rainbow fade",
+            "turn on rainbow fade mode"
+          ]
+        },
+        {
+          "name": "random_fade",
+          "slots": [],
+          "samples": [
+            "random fade",
+            "random fade mode",
+            "change to random fade",
+            "change to random fade mode",
+            "switch to random fade",
+            "switch to random fade mode",
+            "turn on random fade",
+            "turn on random fade mode"
+          ]
+        },
+        {
+          "name": "snake_color",
+          "slots": [],
+          "samples": [
+            "snake color",
+            "snake color mode",
+            "change to snake color",
+            "change to snake color mode",
+            "switch to snake color",
+            "switch to snake color mode",
+            "turn on snake color",
+            "turn on snake color mode"
+          ]
+        },
+        {
+          "name": "snake_fade",
+          "slots": [],
+          "samples": [
+            "snake fade",
+            "snake fade mode",
+            "change to snake fade",
+            "change to snake fade mode",
+            "switch to snake fade",
+            "switch to snake fade mode",
+            "turn on snake fade",
+            "turn on snake fade mode"
+          ]
+        },
+        {
+          "name": "snake_rainbow",
+          "slots": [],
+          "samples": [
+            "snake rainbow",
+            "snake rainbow mode",
+            "change to snake rainbow",
+            "change to snake rainbow mode",
+            "switch to snake rainbow",
+            "switch to snake rainbow mode",
+            "turn on snake rainbow",
+            "turn on snake rainbow mode"
+          ]
+        },
+        {
+          "name": "color",
+          "slots": [
+            {
+              "name": "color_name",
+              "type": "AMAZON.Color",
+              "samples": [
+                "{color_name}",
+                "it's {color_name}",
+                "it's color {color_name}",
+                "change color to {color_name}",
+                "change to color {color_name}",
+                "switch color to {color_name}",
+                "switch to color {color_name}",
+                "turn on color {color_name}"
+              ]
+            }
+          ],
+          "samples": [
+            "change color to {color_name}",
+            "change to color {color_name}",
+            "switch color to {color_name}",
+            "switch to color {color_name}",
+            "turn on color {color_name}"
+          ]
+        },
+        {
+          "name": "strobe",
+          "slots": [],
+          "samples": [
+            "strobe",
+            "strobe mode",
+            "change to strobe",
+            "change to strobe mode",
+            "switch to strobe",
+            "switch to strobe mode",
+            "turn on strobe",
+            "turn on strobe mode"
+          ]
+        }
+      ],
+      "types": []
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "color",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "color_name",
+              "type": "AMAZON.Color",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1077161255043.385481698524"
+              }
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "SKILL_RESPONSE"
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.1077161255043.385481698524",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Please tell me which color you want"
+          },
+          {
+            "type": "PlainText",
+            "value": "Please specify the color"
+          }
+        ]
+      }
+    ]
+  }
+}
